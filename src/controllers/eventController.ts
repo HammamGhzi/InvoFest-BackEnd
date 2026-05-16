@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
 import { Event } from "../types/event";
+import {prisma} from "../lib/db";
 
 let events: Event[] = [];
 
 // menampilkan data event
-export const getEvents = (req: Request, res: Response) => {
-  res.json(events);
+export const getEvents = async (req: Request, res: Response) => {
+  const AllEvent = await prisma.event.findMany({
+    orderBy:{
+      createdAt:"desc",
+    },
+  });
+  res.json(AllEvent);
 };
 // menyimpan data event
 export const createEvent = (req: Request, res: Response) => {

@@ -1,11 +1,16 @@
 import { Request, Response } from "express";
 import { Category } from "../types/category";
+import {prisma} from "../lib/db";
 
 let categories: Category[] = [];
 
 // menampilkan data category
-export const getCategories = (req: Request, res: Response) => {
-  res.json(categories);
+export const getCategories = async (req: Request, res: Response) => {
+  const AllCategory = await prisma.category.findMany({
+    orderBy:{
+      createdAt:"desc", 
+}});
+  res.json(AllCategory);
 };
 // menyimpan data category
 export const createCategory = (req: Request, res: Response) => {
