@@ -7,12 +7,7 @@ import pembicaraRoute from "./routes/pembicaraRoutes";
 
 const app = Express();
 const port = 3000;
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://invofest-harkat-praktikum-molq.vercel.app" 
-  ]
-}))
+app.use(cors())
 
 
 app.use(Express.json());
