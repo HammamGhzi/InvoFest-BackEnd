@@ -10,7 +10,7 @@ const port = 3000;
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://invofest-harkat-praktikum-molq.vercel.app/" 
+    "https://invofest-harkat-praktikum-molq.vercel.app" 
   ]
 }))
 
