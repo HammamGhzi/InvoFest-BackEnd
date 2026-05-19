@@ -1,68 +1,77 @@
 import { Request, Response } from "express";
 import { Category } from "../types/category";
-import {prisma} from "../lib/db";
+import { prisma } from "../lib/db";
 
 let categories: Category[] = [];
 
 // menampilkan data category
 export const getCategories = async (req: Request, res: Response) => {
   const AllCategory = await prisma.category.findMany({
-    orderBy:{
-      createdAt:"desc", 
-}});
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
   res.json(AllCategory);
 };
 // menyimpan data category
-export const createCategory = (req: Request, res: Response) => {
-    const { name } = req.body;
-    if (!name) {
-        return res.status(500).json({ message: "nama harus diisi" });
-    }
-    // simpan data category
-    const newCategory: Category = {
-        id: Date.now(),
-        name
-    };  
-    // simpan data category ke array
-    categories.push(newCategory);   
-    // kirim response dengan data category yang baru dibuat
-    res.status(201).json(newCategory);    
-
-  
-
+export const createCategory = async (req: Request, res: Response) => {
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ message: "nama harus diisi" });
+  }
+  const newCategory = await prisma.category.create({
+    data: { name },
+  });
+  res.status(201).json(newCategory);
 };
 // mengambil daata category berdasarkan id
-export const getCategoryById = (req: Request, res: Response) => {
-    const  id  =Number(req.params.id);
-    const category = categories.find((category) => category.id === id); 
-    if (!category) {
-        return res.status(404).json({ message: "category tidak ditemukan" });
-    }
-    res.json(category);
+export const getCategoryById = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const category = await prisma.category.findUnique({
+    where: { id },
+  });
+  if (!category) {
+    return res.status(404).json({ message: "category tidak ditemukan" });
+  }
+  res.json(category);
 };
 // mengubah data category berdasarkan id
-export const updateCategory = (req: Request, res: Response) => {
-    const  id  =Number(req.params.id);
-    const categoryIndex = categories.findIndex((category) => category.id === id);
-    if (categoryIndex === -1) {
-        return res.status(404).json({ message: "category tidak ditemukan" });
-    }   
-    const { name } = req.body;
-    if (!name) {
-        return res.status(500).json({ message: "nama harus diisi" });
-    }
-    const updatedCategory: Category = {
-        id,
-        name
-    };
-    categories[categoryIndex] = updatedCategory;
-    res.json(updatedCategory);
+export const updateCategory = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ message: "nama harus diisi" });
+  }
+  const category = await prisma.category.findUnique({ where: { id } });
+  if (!category) {
+    return res.status(404).json({ message: "category tidak ditemukan" });
+  }
+  const updated = await prisma.category.update({
+    where: { id },
+    data: { name },
+  });
+  res.json(updated);
 };
 // menghapus data category berdasarkan id
-export const deleteCategory = (req: Request, res: Response) => {
-    const  id  =Number(req.params.id);
-    const categoryIndex = categories.findIndex((category) => category.id === id);
-    if (categoryIndex === -1) {
-        return res.status(404).json({ message: "category tidak ditemukan" });
-    }   
+export const deleteCategory = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  
+  const category = await prisma.category.findUnique({ where: { id } });
+  if (!category) {
+    return res.status(404).json({ message: "category tidak ditemukan" });
+  }
+
+
+  const eventTerkait = await prisma.event.findFirst({
+    where: { categoryId: id }
+  });
+
+  if (eventTerkait) {
+    return res.status(400).json({ 
+      message: "Category tidak bisa dihapus karena masih dipakai oleh event" 
+    });
+  }
+
+  await prisma.category.delete({ where: { id } });
+  res.json({ message: "category berhasil dihapus" });
 };

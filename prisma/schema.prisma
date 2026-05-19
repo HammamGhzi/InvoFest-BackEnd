@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,30 +8,35 @@ datasource db {
 }
 
 model Event {
-  id Int @id @default(autoincrement())
-  name String
-  categoryId String @map("category_id")
-  location String
-  dateEvent DateTime @map("date_event")
-  description String @db.Text
-  createdAt DateTime @default(now()) @map("created_at")
+  id          Int        @id @default(autoincrement())
+  name        String
+  tanggal     DateTime
+  description String     @db.Text
+  categoryId  Int        @map("category_id")
+  pembicaraId Int        @map("pembicara_id")
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  category    Category   @relation(fields: [categoryId], references: [id])
+  pembicara   Pembicaraa @relation(fields: [pembicaraId], references: [id])
 
   @@map("events")
 }
+
 model Category {
-  id Int @id @default(autoincrement())
-  name String
+  id        Int      @id @default(autoincrement())
+  name      String
   createdAt DateTime @default(now()) @map("created_at")
+  events    Event[]
 
   @@map("categories")
-
 }
+
 model Pembicaraa {
-  id Int @id @default(autoincrement())
-  name String
-  role String
-  image String
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      String
   createdAt DateTime @default(now()) @map("created_at")
+  events    Event[]
 
   @@map("speakersnp")
 }
